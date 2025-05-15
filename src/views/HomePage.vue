@@ -10,7 +10,7 @@
           Earn and spend tokens at local businesses, strengthening the community economy and building sustainable neighborhoods.
         </p>
         <div class="hero-buttons">
-          <router-link to="/signup" class="btn primary">Get Started</router-link>
+          <router-link to="/Register" class="btn primary">Get Started</router-link>
           <router-link to="/businesses" class="btn outline">Explore Businesses</router-link>
         </div>
       </div>

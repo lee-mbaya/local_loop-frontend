@@ -7,21 +7,70 @@
       <form @submit.prevent="register">
         <div class="form-group">
           <label for="name">Name</label>
-          <input id="name" v-model="name" type="text" required placeholder="Your name" />
+          <input
+            id="name"
+            name="name"
+            v-model="name"
+            type="text"
+            required
+            placeholder="Your name"
+            autocomplete="name"
+            :disabled="loading"
+          />
+          <span v-if="errors.name" class="error-msg">{{ errors.name }}</span>
         </div>
 
         <div class="form-group">
           <label for="email">Email</label>
-          <input id="email" v-model="email" type="email" required placeholder="you@example.com" />
+          <input
+            id="email"
+            name="email"
+            v-model="email"
+            type="email"
+            required
+            placeholder="you@example.com"
+            autocomplete="email"
+            :disabled="loading"
+          />
+          <span v-if="errors.email" class="error-msg">{{ errors.email }}</span>
         </div>
 
         <div class="form-group">
           <label for="password">Password</label>
-          <input id="password" v-model="password" type="password" required placeholder="••••••••" />
+          <input
+            id="password"
+            name="password"
+            v-model="password"
+            type="password"
+            required
+            placeholder="••••••••"
+            autocomplete="new-password"
+            :disabled="loading"
+          />
+          <span v-if="errors.password" class="error-msg">{{ errors.password }}</span>
         </div>
 
-        <button type="submit" class="register-btn">Register</button>
-        <p v-if="error" class="error-msg">{{ error }}</p>
+        <div class="form-group">
+          <label for="password_confirmation">Confirm Password</label>
+          <input
+            id="password_confirmation"
+            name="password_confirmation"
+            v-model="passwordConfirmation"
+            type="password"
+            required
+            placeholder="••••••••"
+            autocomplete="new-password"
+            :disabled="loading"
+          />
+          <span v-if="errors.password_confirmation" class="error-msg">{{ errors.password_confirmation }}</span>
+        </div>
+
+        <button type="submit" class="register-btn" :disabled="loading">
+          <span v-if="loading">Registering...</span>
+          <span v-else>Register</span>
+        </button>
+
+        <p v-if="errors.general" class="error-msg">{{ errors.general }}</p>
       </form>
 
       <router-link to="/login" class="login-link">
@@ -34,27 +83,60 @@
 <script setup>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import api from '@/axios' // Import your custom axios instance
+import api from '@/axios'
 
 const name = ref('')
 const email = ref('')
 const password = ref('')
-const error = ref('')
+const passwordConfirmation = ref('')
+const errors = ref({
+  name: '',
+  email: '',
+  password: '',
+  password_confirmation: '',
+  general: '',
+})
+const loading = ref(false)
 const router = useRouter()
 
 const register = async () => {
+  loading.value = true
+  errors.value = {
+    name: '',
+    email: '',
+    password: '',
+    password_confirmation: '',
+    general: '',
+  }
+
   try {
-    error.value = ''
-    await api.get('/sanctum/csrf-cookie') // Ensure CSRF token is set
+    await api.get('/sanctum/csrf-cookie')
+
     await api.post('/register', {
       name: name.value,
       email: email.value,
       password: password.value,
+      password_confirmation: passwordConfirmation.value,
     })
-    router.push('/') // Redirect to homepage after successful registration
+
+    router.push('/')
   } catch (err) {
-    error.value = 'Registration failed. Please try again.'
-    console.error(err)
+    if (err.response?.status === 422) {
+      const responseErrors = err.response.data.errors
+      for (const key in responseErrors) {
+        if (errors.value.hasOwnProperty(key)) {
+          errors.value[key] = responseErrors[key][0]
+        }
+      }
+    } else if (err.response?.status === 419) {
+      errors.value.general = 'Session expired. Please refresh the page and try again.'
+    } else {
+      errors.value.general = 'Registration failed. Please try again later.'
+    }
+
+    console.error('Register error:', err)
+  } finally {
+    loading.value = false
   }
 }
 </script>
@@ -123,15 +205,22 @@ input {
   border-radius: 6px;
   cursor: pointer;
   margin-top: 0.5rem;
+  transition: background-color 0.2s ease;
 }
 
-.register-btn:hover {
+.register-btn[disabled] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.register-btn:hover:not([disabled]) {
   background-color: #1b4332;
 }
 
 .error-msg {
   color: #e63946;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
 }
 
 .login-link {

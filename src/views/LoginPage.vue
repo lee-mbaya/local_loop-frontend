@@ -7,16 +7,53 @@
       <form @submit.prevent="login">
         <div class="form-group">
           <label for="email">Email</label>
-          <input id="email" v-model="email" type="email" required placeholder="you@example.com" />
+          <input
+            id="email"
+            name="email"
+            type="email"
+            v-model="email"
+            required
+            autocomplete="email"
+            placeholder="you@example.com"
+            :disabled="loading"
+          />
+          <span v-if="errors.email" class="error-msg">{{ errors.email }}</span>
         </div>
 
         <div class="form-group">
           <label for="password">Password</label>
-          <input id="password" v-model="password" type="password" required placeholder="••••••••" />
+          <input
+            id="password"
+            name="password"
+            type="password"
+            v-model="password"
+            required
+            autocomplete="current-password"
+            placeholder="••••••••"
+            :disabled="loading"
+          />
+          <span v-if="errors.password" class="error-msg">{{ errors.password }}</span>
         </div>
 
-        <button type="submit" class="login-btn">Login</button>
-        <p v-if="error" class="error-msg">{{ error }}</p>
+        <div class="form-group checkbox-group">
+          <label for="remember" class="checkbox-label">
+            <input
+              id="remember"
+              name="remember"
+              type="checkbox"
+              v-model="rememberMe"
+              :disabled="loading"
+            />
+            Remember me
+          </label>
+        </div>
+
+        <button type="submit" class="login-btn" :disabled="loading">
+          <span v-if="loading">Logging in...</span>
+          <span v-else>Login</span>
+        </button>
+
+        <p v-if="errors.general" class="error-msg">{{ errors.general }}</p>
       </form>
 
       <router-link to="/register" class="register-link">
@@ -33,27 +70,45 @@ import api from '@/axios'
 
 const email = ref('')
 const password = ref('')
-const error = ref('')
+const rememberMe = ref(false)
+const errors = ref({
+  email: '',
+  password: '',
+  general: '',
+})
+const loading = ref(false)
 const router = useRouter()
-const login = async () => {
-  try {
-    error.value = '';
 
-    await api.get('/sanctum/csrf-cookie');
+const login = async () => {
+  loading.value = true
+  errors.value = { email: '', password: '', general: '' }
+
+  try {
+    await api.get('/sanctum/csrf-cookie')
 
     await api.post('/login', {
       email: email.value,
       password: password.value,
-    });
+      remember: rememberMe.value,
+    })
 
-    router.push('/');
+    router.push('/')
   } catch (err) {
-    error.value = 'Invalid credentials or server error';
-    console.error(err);
+    if (err.response?.status === 422) {
+      const responseErrors = err.response.data.errors
+      errors.value.email = responseErrors.email?.[0] || ''
+      errors.value.password = responseErrors.password?.[0] || ''
+    } else if (err.response?.status === 401) {
+      errors.value.general = 'Invalid email or password.'
+    } else {
+      errors.value.general = 'Server error. Please try again later.'
+    }
+
+    console.error('Login error:', err)
+  } finally {
+    loading.value = false
   }
-};
-
-
+}
 </script>
 
 <style scoped>
@@ -102,12 +157,27 @@ label {
   color: #333;
 }
 
-input {
+input[type="email"],
+input[type="password"] {
   width: 100%;
   padding: 0.6rem;
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 1rem;
+}
+
+.checkbox-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1.2rem;
+}
+
+.checkbox-label {
+  font-size: 0.95rem;
+  color: #333;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .login-btn {
@@ -120,15 +190,22 @@ input {
   border-radius: 6px;
   cursor: pointer;
   margin-top: 0.5rem;
+  transition: background-color 0.2s ease;
 }
 
-.login-btn:hover {
+.login-btn[disabled] {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.login-btn:hover:not([disabled]) {
   background-color: #1b4332;
 }
 
 .error-msg {
   color: #e63946;
-  margin-top: 1rem;
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
 }
 
 .register-link {

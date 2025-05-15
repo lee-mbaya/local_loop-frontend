@@ -1,10 +1,21 @@
 import axios from 'axios'
+import Cookies from 'js-cookie'
 
-// Create a custom Axios instance
 const api = axios.create({
-  baseURL: 'http://127.0.0.1:8000', // Laravel backend
-  withCredentials: true,
+  baseURL: 'http://localhost:8000',
+  withCredentials: true, // Needed for Sanctum
 })
 
-// Don't call csrf-cookie here automatically — move it to your login/register logic
+// Automatically add CSRF token from cookie
+api.interceptors.request.use((config) => {
+  const token = Cookies.get('XSRF-TOKEN')
+  if (token) {
+    config.headers['X-XSRF-TOKEN'] = decodeURIComponent(token)
+  }
+  return config
+})
+
 export default api
+
+
+

@@ -1,19 +1,13 @@
 <template>
-  <nav class="bg-white shadow-sm py-4 px-6">
-    <div class="container mx-auto flex justify-between items-center">
+  <nav class="navbar" :class="{ 'dark-mode': isDark }">
+    <div class="navbar-container">
       <!-- Logo & Title -->
-      <RouterLink to="/" class="flex items-center gap-2">
-        <div class="rounded-full bg-loop-orange p-2">
-          <svg
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-            class="text-white"
-          >
+      <RouterLink to="/" class="logo">
+        <div class="logo-icon">
+          <!-- Example SVG logo -->
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
             <path
-              d="M12 8L16 12L12 16M8 12H16M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12Z"
+              d="M12 8L16 12L12 16M8 12H16M22 12C22 17.52 17.52 22 12 22C6.48 22 2 17.52 2 12C2 6.48 6.48 2 12 2C17.52 2 22 6.48 22 12Z"
               stroke="currentColor"
               stroke-width="2"
               stroke-linecap="round"
@@ -21,82 +15,197 @@
             />
           </svg>
         </div>
-        <span class="text-2xl font-bold text-gray-800">Local Loop</span>
+        <span class="logo-text">Local Loop</span>
       </RouterLink>
 
-      <!-- Desktop Navigation -->
-      <div class="hidden md:flex items-center space-x-6">
-        <RouterLink to="/tokens" class="text-gray-600 hover:text-loop-orange transition-colors">Tokens</RouterLink>
-        <RouterLink to="/businesses" class="text-gray-600 hover:text-loop-orange transition-colors">Businesses</RouterLink>
-        <RouterLink to="/donate" class="text-gray-600 hover:text-loop-orange transition-colors">Donate</RouterLink>
-        <RouterLink to="/about" class="text-gray-600 hover:text-loop-orange transition-colors">About Us</RouterLink>
-        <RouterLink to="/contact" class="text-gray-600 hover:text-loop-orange transition-colors">Contact</RouterLink>
-      </div>
+      <!-- Navigation Links -->
+      <div class="nav-links" :class="{ open: isMenuOpen }">
+        <RouterLink to="/tokens" @click="toggleMenu">Tokens</RouterLink>
+        <RouterLink to="/businesses" @click="toggleMenu">Businesses</RouterLink>
+        <RouterLink to="/donate" @click="toggleMenu">Donate</RouterLink>
+        <RouterLink to="/about" @click="toggleMenu">About Us</RouterLink>
+        <RouterLink to="/contact" @click="toggleMenu">Contact</RouterLink>
 
-      <!-- Desktop Auth Buttons -->
-      <div class="hidden md:flex items-center space-x-4">
-        <RouterLink to="/login" class="flex items-center gap-1 border border-gray-300 px-3 py-1 rounded-md hover:border-loop-orange">
-          <LogIn class="w-4 h-4 mr-1" /> Login
-        </RouterLink>
-        <RouterLink to="/register" class="flex items-center gap-1 bg-loop-orange text-white px-3 py-1 rounded-md hover:bg-opacity-90">
-          <User class="w-4 h-4 mr-1" /> Sign Up
-        </RouterLink>
-      </div>
-
-      <!-- Mobile Menu Button -->
-      <button class="md:hidden text-gray-700 focus:outline-none" @click="toggleMenu" aria-label="Toggle Menu">
-        <svg v-if="isMenuOpen" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
-        <svg v-else xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-      </button>
-    </div>
-
-    <!-- Mobile Navigation -->
-    <div v-if="isMenuOpen" class="md:hidden mt-4 bg-white border-t pt-4">
-      <div class="flex flex-col space-y-2 px-4 pb-4">
-        <RouterLink to="/tokens" class="flex items-center gap-2 text-gray-700" @click="toggleMenu">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
-            <path d="M12 8V12M12 16H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-          </svg>
-          Tokens
-        </RouterLink>
-        <RouterLink to="/businesses" class="flex items-center gap-2 text-gray-700" @click="toggleMenu">
-          <List class="h-4 w-4" /> Businesses
-        </RouterLink>
-        <RouterLink to="/donate" class="flex items-center gap-2 text-gray-700" @click="toggleMenu">
-          <DollarSign class="h-4 w-4" /> Donate
-        </RouterLink>
-        <RouterLink to="/about" class="flex items-center gap-2 text-gray-700" @click="toggleMenu">
-          <BookOpen class="h-4 w-4" /> About Us
-        </RouterLink>
-        <RouterLink to="/contact" class="flex items-center gap-2 text-gray-700" @click="toggleMenu">
-          <MessageSquare class="h-4 w-4" /> Contact
-        </RouterLink>
-
-        <div class="pt-4 flex flex-col space-y-2">
-          <RouterLink to="/login" class="w-full flex justify-center items-center border border-gray-300 py-2 rounded-md" @click="toggleMenu">
-            <LogIn class="w-4 h-4 mr-2" /> Login
-          </RouterLink>
-          <RouterLink to="/register" class="w-full flex justify-center items-center bg-loop-orange text-white py-2 rounded-md" @click="toggleMenu">
-            <User class="w-4 h-4 mr-2" /> Sign Up
-          </RouterLink>
+        <div class="auth-buttons">
+          <RouterLink to="/login" class="btn-outline" @click="toggleMenu">Login</RouterLink>
+          <RouterLink to="/register" class="btn-filled" @click="toggleMenu">Sign Up</RouterLink>
         </div>
       </div>
+
+      <!-- Mobile Menu Toggle -->
+      <button class="menu-toggle" @click="toggleMenu" aria-label="Toggle menu">
+        <span v-if="!isMenuOpen">&#9776;</span> <!-- hamburger -->
+        <span v-else>&times;</span> <!-- close icon -->
+      </button>
     </div>
   </nav>
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, inject } from 'vue'
 import { RouterLink } from 'vue-router'
-import { BookOpen, DollarSign, List, LogIn, MessageSquare, User } from 'lucide-vue-next'
+
+// Receive dark mode reactive variable from parent
+const isDark = inject('isDark')
 
 const isMenuOpen = ref(false)
 const toggleMenu = () => {
   isMenuOpen.value = !isMenuOpen.value
 }
 </script>
+
+<style scoped>
+/* Navbar container */
+.navbar {
+  background-color: white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  padding: 1rem;
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  color: #555;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+.navbar.dark-mode {
+  background-color: #1f2937; /* Dark bg */
+  color: #e5e7eb; /* Light text */
+  box-shadow: none;
+}
+
+/* Navbar container */
+.navbar-container {
+  max-width: 1200px;
+  margin: auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+/* Logo */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  color: inherit;
+}
+
+.logo-icon {
+  background-color: orange;
+  padding: 8px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar.dark-mode .logo-icon {
+  background-color: #f97316; /* slightly lighter orange */
+}
+
+.logo-text {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+/* Nav links */
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: inherit;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.nav-links a:hover {
+  color: orange;
+}
+
+/* Auth buttons */
+.auth-buttons {
+  display: flex;
+  gap: 1rem;
+  margin-left: 1rem;
+}
+
+.btn-outline {
+  border: 1px solid #ccc;
+  padding: 6px 14px;
+  border-radius: 5px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s;
+}
+
+.btn-outline:hover {
+  border-color: orange;
+}
+
+.btn-filled {
+  background-color: orange;
+  color: white;
+  padding: 6px 14px;
+  border-radius: 5px;
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.btn-filled:hover {
+  background-color: darkorange;
+}
+
+.navbar.dark-mode .btn-outline {
+  border-color: #555;
+  color: #ddd;
+}
+.navbar.dark-mode .btn-outline:hover {
+  border-color: #f97316;
+}
+.navbar.dark-mode .btn-filled {
+  background-color: #f97316;
+}
+.navbar.dark-mode .btn-filled:hover {
+  background-color: #ea580c;
+}
+
+/* Mobile styles */
+.menu-toggle {
+  display: none;
+  font-size: 1.5rem;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+/* Responsive rules */
+@media (max-width: 768px) {
+  .nav-links {
+    display: none;
+    width: 100%;
+    flex-direction: column;
+    margin-top: 1rem;
+    gap: 1rem;
+  }
+
+  .nav-links.open {
+    display: flex;
+  }
+
+  .auth-buttons {
+    flex-direction: column;
+    margin-left: 0;
+  }
+
+  .menu-toggle {
+    display: block;
+  }
+}
+</style>

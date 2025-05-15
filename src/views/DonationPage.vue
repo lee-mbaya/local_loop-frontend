@@ -130,8 +130,8 @@ const submitDonation = () => {
 
 <style scoped>
 .donation-container {
-  background-color: #f5f5dc;
-  color: #5D4037;
+  background-color: #1b1b1b;
+  color: #fff;
 }
 
 .text-donation {
@@ -140,18 +140,22 @@ const submitDonation = () => {
 }
 
 .text-secondary {
-  color: #5D4037;
+  color: #bbb;
+}
+
+.max-width-text {
+  max-width: 600px;
 }
 
 .donation-card {
-  background-color: #fff2e6;
+  background-color: #2e2e2e;
   border-radius: 16px;
-  color: #5D4037;
+  color: #ffffff;
   transition: box-shadow 0.3s ease;
 }
 
 .donation-card:hover {
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
 .donate-btn {
@@ -160,6 +164,7 @@ const submitDonation = () => {
   font-weight: bold;
   border-radius: 10px;
 }
+
 .donate-btn:hover {
   background-color: #d06045;
 }
